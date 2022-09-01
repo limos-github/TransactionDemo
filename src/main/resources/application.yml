@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@192.168.12.92:1521:orcl
+    username: jnt_ml_jjk_dev
+    password: jnt_ml_jjk_dev2019
+    druid:
+      initial-size: 15
+      max-active: 100
+      min-idle: 15
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      validation-query: SELECT 1
+      validation-query-timeout: 1000
+      keep-alive: true
+      remove-abandoned: true
+      remove-abandoned-timeout: 180
+      log-abandoned: true
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall,slf4j
+      use-global-data-source-stat: true
+      maxOpenPreparedStatements: 100
+      connect-properties.mergeSql: true
+      connect-properties.slowSqlMillis: 5000

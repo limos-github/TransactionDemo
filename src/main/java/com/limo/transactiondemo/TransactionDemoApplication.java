@@ -1,10 +1,14 @@
 package com.limo.transactiondemo;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
+/**
+ * @author limo
+ */
 @SpringBootApplication
+@MapperScan({"com.limo.transactiondemo.mapper"})
 public class TransactionDemoApplication {
 
     public static void main(String[] args) {
