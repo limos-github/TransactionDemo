@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
  * <p>
@@ -24,6 +25,7 @@ import lombok.EqualsAndHashCode;
  * @since 2022-09-01
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 @TableName("TEST_TRANSACTION")
 @KeySequence("TEST_TRANSACTION_SEQ")
@@ -58,5 +60,14 @@ public class TestTransaction implements Serializable {
     @TableField("WEIGHT")
     private Long weight;
 
-
+    @Override
+    public String toString() {
+        return "TestTransaction{" +
+                "id=" + id +
+                ", length=" + length +
+                ", width=" + width +
+                ", height=" + height +
+                ", weight=" + weight +
+                '}';
+    }
 }
