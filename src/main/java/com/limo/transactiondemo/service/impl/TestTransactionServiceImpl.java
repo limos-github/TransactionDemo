@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.limo.transactiondemo.entity.TestTransaction;
 import com.limo.transactiondemo.exception.BusinessException;
 import com.limo.transactiondemo.mapper.TestTransactionMapper;
+import com.limo.transactiondemo.service.ISubTransactionService;
 import com.limo.transactiondemo.service.ITestTransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -17,11 +20,14 @@ import java.util.List;
  * 测试事务 服务实现类
  * </p>
  *
- * @author zyy
+ * @author limo
  * @since 2022-09-01
  */
 @Service
 public class TestTransactionServiceImpl extends ServiceImpl<TestTransactionMapper, TestTransaction> implements ITestTransactionService {
+
+    @Autowired
+    private ISubTransactionService iSubTransactionService;
 
     @Override
     @Transactional(rollbackFor = BusinessException.class)
@@ -43,6 +49,67 @@ public class TestTransactionServiceImpl extends ServiceImpl<TestTransactionMappe
         update(wrapper.set(TestTransaction::getWeight, weight));
         List<Integer> list = Arrays.asList(1, 1);
         list.get(10);
+    }
+
+    @Override
+    public void propagation(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {
+        update(wrapper.set(TestTransaction::getWeight, weight));
+        iSubTransactionService.propagationREQUIRED(wrapper, weight);
+    }
+
+    @Override
+    public void propagationAToA_REQUIRED(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {
+        update(wrapper.set(TestTransaction::getWeight, weight));
+        propagationREQUIRED(wrapper, weight);
+    }
+
+    @Override
+    public void propagationA_REQUIRESToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {
+        update(wrapper.set(TestTransaction::getWeight, weight));
+        iSubTransactionService.propagationREQUIRES_NEW(wrapper, weight);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    public void propagationREQUIRED(LambdaUpdateWrapper<TestTransaction> wrapper, Long width) throws Exception {
+        update(wrapper.set(TestTransaction::getWidth, width));
+        errorException();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    public void propagationREQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.SUPPORTS)
+    public void propagationSUPPORTS(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NOT_SUPPORTED)
+    public void propagationNOT_SUPPORTED(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NEVER)
+    public void propagationNEVER(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
+    public void propagationNESTED(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.MANDATORY)
+    public void propagationMANDATORY(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+
     }
 
     @Override

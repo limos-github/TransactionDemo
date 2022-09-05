@@ -19,7 +19,7 @@ import java.util.StringJoiner;
  * 测试事务 前端控制器
  * </p>
  *
- * @author zyy
+ * @author limo
  * @since 2022-09-01
  */
 @RestController
@@ -133,4 +133,95 @@ public class TestTransactionController {
         return sj.toString();
     }
 
+
+    @RequestMapping("/propagationAToB_REQUIRED")
+    public String propagationAToB_REQUIRED(Long weight) {
+        int i = 0;
+        StringJoiner sj = new StringJoiner("\n ");
+        sj.add("");
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "propagationAToB_REQUIRED"));
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "wrapper.eq(TestTransaction::getId, 1L)"));
+        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getId, 1L);
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        try {
+            iTestTransactionService.propagation(wrapper, weight);
+        } catch (Exception e) {
+            sj.add(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    public void propagation(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {\n" +
+                    "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
+                    "        iSubTransactionService.propagationREQUIRED(wrapper, weight);\n" +
+                    "        errorException();\n" +
+                    "    }");
+            sj.add(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)\n" +
+                    "    public void propagationREQUIRED(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) {\n" +
+                    "        update(wrapper.set(TestTransaction::getHeight, height));\n" +
+                    "    }");
+        }
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        return sj.toString();
+    }
+
+    @RequestMapping("/propagationAToA_REQUIRED")
+    public String propagationAToA_REQUIRED(Long weight) {
+        int i = 0;
+        StringJoiner sj = new StringJoiner("\n ");
+        sj.add("");
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "propagationAToA_REQUIRED"));
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "wrapper.eq(TestTransaction::getId, 1L)"));
+        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getId, 1L);
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        try {
+            iTestTransactionService.propagationAToA_REQUIRED(wrapper, weight);
+        } catch (Exception e) {
+            sj.add(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    public void propagation(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {\n" +
+                    "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
+                    "        iSubTransactionService.propagationREQUIRED(wrapper, weight);\n" +
+
+                    "    }");
+            sj.add(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)\n" +
+                    "    public void propagationREQUIRED(LambdaUpdateWrapper<TestTransaction> wrapper, Long width) {\n" +
+                    "        update(wrapper.set(TestTransaction::getWidth, width));\n" +
+                    "        errorException();\n" +
+                    "    }");
+        }
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        return sj.toString();
+    }
+
+    @RequestMapping("/propagationAToA_REQUIRED")
+    public String propagationA_REQUIRESToB_REQUIRES_NEW(Long weight) {
+        int i = 0;
+        StringJoiner sj = new StringJoiner("\n ");
+        sj.add("");
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "propagationA_REQUIRESToB_REQUIRES_NEW"));
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "wrapper.eq(TestTransaction::getId, 1L)"));
+        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getId, 1L);
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        try {
+            iTestTransactionService.propagationA_REQUIRESToB_REQUIRES_NEW(wrapper, weight);
+        } catch (Exception e) {
+            sj.add(++i + "↓    " + "    \n" +
+                    "    @Override\n" +
+                    "    public void propagationA_REQUIRESToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {\n" +
+                    "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
+                    "        iSubTransactionService.propagationREQUIRES_NEW(wrapper, weight);\n" +
+                    "    }");
+            sj.add(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)\n" +
+                    "    public void propagationREQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) throws Exception {\n" +
+                    "        update(wrapper.set(TestTransaction::getHeight, height));\n" +
+                    "        errorException();\n" +
+                    "    }");
+        }
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        return sj.toString();
+    }
 }

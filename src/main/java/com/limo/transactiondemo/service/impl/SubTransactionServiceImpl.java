@@ -1,14 +1,13 @@
 package com.limo.transactiondemo.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.limo.transactiondemo.entity.TestTransaction;
 import com.limo.transactiondemo.exception.BusinessException;
 import com.limo.transactiondemo.mapper.TestTransactionMapper;
 import com.limo.transactiondemo.service.ISubTransactionService;
-import com.limo.transactiondemo.service.ITestTransactionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -16,32 +15,55 @@ import org.springframework.transaction.annotation.Transactional;
  * 测试事务 服务实现类
  * </p>
  *
- * @author zyy
+ * @author limo
  * @since 2022-09-01
  */
 @Service
 public class SubTransactionServiceImpl extends ServiceImpl<TestTransactionMapper, TestTransaction> implements ISubTransactionService {
 
     @Override
-    @Transactional(rollbackFor = BusinessException.class)
-    public String rollbackForBusinessException() {
-        String result = "";
-        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getHeight, 1L);
-        TestTransaction one = getOne(wrapper);
-        System.out.println("前"+ one.toString());
-        update(wrapper.set(TestTransaction::getWidth, 8L));
-        one = getOne(wrapper);
-        System.out.println("后"+ one.toString());
-        result = result + one.toString();
-        errorBusinessException();
-        return result;
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    public void propagationREQUIRED(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) throws Exception {
+        update(wrapper.set(TestTransaction::getHeight, height));
+        errorException();
     }
 
     @Override
-    public String rollbackForException() {
-        return null;
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    public void propagationREQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) throws Exception {
+        update(wrapper.set(TestTransaction::getHeight, height));
+        errorException();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.SUPPORTS)
+    public void propagationSUPPORTS(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NOT_SUPPORTED)
+    public void propagationNOT_SUPPORTED(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NEVER)
+    public void propagationNEVER(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
+    public void propagationNESTED(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.MANDATORY)
+    public void propagationMANDATORY(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) {
+
+    }
     @Override
     public void errorBusinessException() throws BusinessException {
         throw new BusinessException(1, "手动异常");

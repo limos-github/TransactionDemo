@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 测试事务 Mapper 接口
  * </p>
  *
- * @author zyy
+ * @author limo
  * @since 2022-09-01
  */
 public interface TestTransactionMapper extends BaseMapper<TestTransaction> {
