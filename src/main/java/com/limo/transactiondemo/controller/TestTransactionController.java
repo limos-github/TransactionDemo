@@ -60,6 +60,30 @@ public class TestTransactionController {
     }
 
 
+    @RequestMapping("/timeOut")
+    public String timeOut(Long weight) {
+        int i = 0;
+        StringJoiner sj = new StringJoiner("\n");
+        sj.add("");
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "timeOut"));
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "wrapper.eq(TestTransaction::getId, 1L)"));
+        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getId, 1L);
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        try {
+            iTestTransactionService.timeOut(wrapper, weight);
+        } catch (Exception e) {
+            sj.add(JSONUtil.toJsonStr(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, timeout = 3)\n" +
+                    "    public void timeOut(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {\n" +
+                    "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
+                    "            Thread.sleep(5000);\n" +
+                    "    }"));
+        }
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        return sj.toString();
+    }
+
     @RequestMapping("/rollbackForBusinessException")
     public String rollbackForBusinessException(Long weight) {
         int i = 0;
@@ -76,6 +100,30 @@ public class TestTransactionController {
                     "    @Override\n" +
                     "    @Transactional(rollbackFor = BusinessException.class)\n" +
                     "    public void rollbackForBusinessException(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {\n" +
+                    "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
+                    "        errorBusinessException();\n" +
+                    "    }"));
+        }
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        return sj.toString();
+    }
+
+    @RequestMapping("/noRollbackForBusinessException")
+    public String noRollbackForBusinessException(Long weight) {
+        int i = 0;
+        StringJoiner sj = new StringJoiner("\n");
+        sj.add("");
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "noRollbackForBusinessException"));
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "wrapper.eq(TestTransaction::getId, 1L)"));
+        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getId, 1L);
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        try {
+            iTestTransactionService.noRollbackForBusinessException(wrapper, weight);
+        } catch (Exception e) {
+            sj.add(JSONUtil.toJsonStr(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    @Transactional(noRollbackFor = BusinessException.class, rollbackFor = Exception.class)\n" +
+                    "    public void noRollbackForBusinessException(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {\n" +
                     "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
                     "        errorBusinessException();\n" +
                     "    }"));
@@ -195,7 +243,7 @@ public class TestTransactionController {
         return sj.toString();
     }
 
-    @RequestMapping("/propagationAToA_REQUIRED")
+    @RequestMapping("/propagationA_REQUIRESToB_REQUIRES_NEW")
     public String propagationA_REQUIRESToB_REQUIRES_NEW(Long weight) {
         int i = 0;
         StringJoiner sj = new StringJoiner("\n ");
@@ -207,11 +255,46 @@ public class TestTransactionController {
         try {
             iTestTransactionService.propagationA_REQUIRESToB_REQUIRES_NEW(wrapper, weight);
         } catch (Exception e) {
-            sj.add(++i + "↓    " + "    \n" +
+            sj.add(++i + "↓    " + "\n" +
                     "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)\n" +
                     "    public void propagationA_REQUIRESToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {\n" +
                     "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
                     "        iSubTransactionService.propagationREQUIRES_NEW(wrapper, weight);\n" +
+                    "    }");
+            sj.add(++i + "↓    " + "\n" +
+                    "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)\n" +
+                    "    public void propagationREQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long height) throws Exception {\n" +
+                    "        update(wrapper.set(TestTransaction::getHeight, height));\n" +
+                    "        errorException();\n" +
+                    "    }");
+        }
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        return sj.toString();
+    }
+
+    @RequestMapping("/propagationA_REQUIRESTryToB_REQUIRES_NEW")
+    public String propagationA_REQUIRESTryToB_REQUIRES_NEW(Long weight) {
+        int i = 0;
+        StringJoiner sj = new StringJoiner("\n ");
+        sj.add("");
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "propagationA_REQUIRESTryToB_REQUIRES_NEW"));
+        sj.add(JSONUtil.toJsonStr(++i + "↓    " + "wrapper.eq(TestTransaction::getId, 1L)"));
+        LambdaUpdateWrapper<TestTransaction> wrapper = Wrappers.lambdaUpdate(TestTransaction.class).eq(TestTransaction::getId, 1L);
+        sj.add(++i + "↓    " + JSONUtil.toJsonStr(iTestTransactionService.getOne(wrapper)));
+        try {
+            iTestTransactionService.propagationA_REQUIRESTryToB_REQUIRES_NEW(wrapper, weight);
+        } catch (Exception e) {
+            sj.add(++i + "↓    " + "    @Override\n" +
+                    "    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)\n" +
+                    "    public void propagationA_REQUIRESTryToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {\n" +
+                    "        update(wrapper.set(TestTransaction::getWeight, weight));\n" +
+                    "        try {\n" +
+                    "            iSubTransactionService.propagationREQUIRES_NEW(wrapper, weight);\n" +
+                    "        } catch (Exception e) {\n" +
+                    "            e.printStackTrace();\n" +
+                    "        }\n" +
                     "    }");
             sj.add(++i + "↓    " + "\n" +
                     "    @Override\n" +

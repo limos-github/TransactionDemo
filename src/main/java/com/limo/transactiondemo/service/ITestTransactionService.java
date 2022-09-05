@@ -46,4 +46,10 @@ public interface ITestTransactionService extends IService<TestTransaction> {
     void errorException() throws Exception;
 
     void propagationAToA_REQUIRED(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception;
+
+    void timeOut(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight);
+
+    void noRollbackForBusinessException(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight);
+
+    void propagationA_REQUIRESTryToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight);
 }

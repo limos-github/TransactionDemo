@@ -30,8 +30,26 @@ public class TestTransactionServiceImpl extends ServiceImpl<TestTransactionMappe
     private ISubTransactionService iSubTransactionService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class, timeout = 3)
+    public void timeOut(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+        update(wrapper.set(TestTransaction::getWeight, weight));
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     @Transactional(rollbackFor = BusinessException.class)
     public void rollbackForBusinessException(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+        update(wrapper.set(TestTransaction::getWeight, weight));
+        errorBusinessException();
+    }
+
+    @Override
+    @Transactional(noRollbackFor = BusinessException.class, rollbackFor = Exception.class)
+    public void noRollbackForBusinessException(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
         update(wrapper.set(TestTransaction::getWeight, weight));
         errorBusinessException();
     }
@@ -64,9 +82,21 @@ public class TestTransactionServiceImpl extends ServiceImpl<TestTransactionMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public void propagationA_REQUIRESToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) throws Exception {
         update(wrapper.set(TestTransaction::getWeight, weight));
         iSubTransactionService.propagationREQUIRES_NEW(wrapper, weight);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    public void propagationA_REQUIRESTryToB_REQUIRES_NEW(LambdaUpdateWrapper<TestTransaction> wrapper, Long weight) {
+        update(wrapper.set(TestTransaction::getWeight, weight));
+        try {
+            iSubTransactionService.propagationREQUIRES_NEW(wrapper, weight);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
