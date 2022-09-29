@@ -2,7 +2,7 @@
 SPRING BOOT + ORACLE + MYBATIS PLUS 
 
 
-`-- auto-generated definition
+`-- oracle auto-generated definition
 create table TEST_TRANSACTION
 (
 ID     NUMBER(20) not null
@@ -24,4 +24,19 @@ START WITH 1
 INCREMENT BY 1
 MINVALUE 1 NOMAXVALUE
 cache 30;
+`
+
+`
+MYSQL
+create table TEST_TRANSACTION
+(
+ID bigint auto_increment,
+LENGTH int null comment '长',
+WIDTH int null comment '宽',
+HEIGHT int null comment '高',
+WEIGHT int null comment '重量',
+constraint TEST_TRANSACTION_pk
+primary key (ID)
+)
+comment '测试事务';
 `
