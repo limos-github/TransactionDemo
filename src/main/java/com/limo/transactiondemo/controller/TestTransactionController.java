@@ -23,7 +23,7 @@ import java.util.StringJoiner;
  * @since 2022-09-01
  */
 @RestController
-@RequestMapping("//test-transaction")
+@RequestMapping("/test-transaction")
 public class TestTransactionController {
 
     @Autowired
