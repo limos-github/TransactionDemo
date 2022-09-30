@@ -1,5 +1,5 @@
 server:
-  prot: 9740
+  port: 9740
   #oracle
 #spring:
 #  datasource:
